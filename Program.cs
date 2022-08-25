@@ -24,7 +24,6 @@ namespace Sales_taxes
 
                     if (input?.Trim().ToLower() == "end")
                     {
-                        exitFlag = false;
                         PrintBill(salesService.GetBillResponse());
                         break;
                     }

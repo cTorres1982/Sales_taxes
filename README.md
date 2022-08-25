@@ -2,9 +2,10 @@
 This is a console application to calculate and print a bill
 
 # Instructions
-Write your inputs with the next format ```[Quantity] [Description] at [Price]``` where quantity should be a integer number and price a decimal, example '1 Book at 12.49'.
-To end and get your bill write the word 'END'
-To finish your session write the word 'EXIT'
+* Write your inputs with the next format ```[Quantity] [Description] [Category] at [Price]``` where quantity should be a integer number, category is an optional data and price a decimal, example '1 Book at 12.49'.
+* Uncategorized items will get basic tax, 'Book', 'Food' and 'Medicine' categories are excluded. 
+* To end and get your bill write the word 'END'
+* To finish your session write the word 'EXIT'
 
 ### Assumptions
 1. No persistency was required, hence every run is a new and only bill.
