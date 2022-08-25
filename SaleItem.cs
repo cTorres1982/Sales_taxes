@@ -17,8 +17,11 @@ namespace Sales_taxes
         public decimal Taxes { get; set; }
 
         public decimal FinalPrice { get; set; }
+        
+        public ItemCategories Category { get; set; }
 
         public bool hasExceptions { get; set; }
+        
         public bool IsImported { get; set; }
 
         public SaleItem()
