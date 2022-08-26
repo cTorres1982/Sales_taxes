@@ -13,7 +13,7 @@ namespace Sales_taxes
             {
                 try
                 {
-                    Console.WriteLine("Write your sales --Write Exit to quit --Write End to finish a bill");
+                    Console.WriteLine("Write your sales --Write Print to get your bill --Write Exit to quit ");
 
                     string? input = Console.ReadLine();                    
 
@@ -22,10 +22,9 @@ namespace Sales_taxes
                         exitFlag = false;
                     }
 
-                    if (input?.Trim().ToLower() == "end")
+                    if (input?.Trim().ToLower() == "print")
                     {
                         PrintBill(salesService.GetBillResponse());
-                        break;
                     }
 
                     var response = salesService.parseText(input);
@@ -39,6 +38,7 @@ namespace Sales_taxes
                         Console.WriteLine("Entered>> " +
                             $"\nQuantity:{response.SaleItem.Quantity} " +
                             $"\nDescription:{response.SaleItem.Description} " +
+                            $"\nCategory:{response.SaleItem.Category} " +
                             $"\nPrice:{response.SaleItem.Price} " +
                             $"\nTaxes:{response.SaleItem.Taxes}" +
                             $"\nTotal:{response.SaleItem.FinalPrice}");
@@ -46,8 +46,7 @@ namespace Sales_taxes
 
                 }
                 catch(Exception ex)
-                {
-                    
+                {                    
                     Console.WriteLine(ex.Message);
                 }
             } while(exitFlag);
@@ -60,7 +59,7 @@ namespace Sales_taxes
             {
                 var detail = item.Quantity > 1 ? $"({item.Quantity} @ {item.FinalPrice})" : string.Empty;
 
-                Console.WriteLine($"{item.Description}: {item.FinalPrice} {detail}");
+                Console.WriteLine($"{item.Description}: {item.FinalPrice * item.Quantity} {detail}");
             }
             Console.WriteLine($"Sales Taxes: {billResponse.TotalTaxes}");
             Console.WriteLine($"Total: {billResponse.Total}");
