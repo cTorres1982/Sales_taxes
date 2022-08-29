@@ -1,4 +1,5 @@
 using Sales_taxes.DTO;
+using System;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
@@ -7,7 +8,7 @@ namespace Sales_taxes
 {
     public class SalesService
     {
-        private const string pattern = "(^|\\.\\s+)\\d+\\s[\\b\\w*\\b]+at\\s(\\d+(?:[.,]\\d+)?)$";
+        private const string pattern = @"(^\d+)\s(\w.*)+\s(\bat\b)+\s(\d+(?:[.,]\d+)?)$";
         private const decimal basicTax = 10;
         private const decimal importTax = 5;
         private List<SaleItem> _saleItems = new List<SaleItem>();
@@ -36,6 +37,7 @@ namespace Sales_taxes
             decimal price = 0;
             int quantity = 0;
             string category = string.Empty;
+            (ItemCategories, bool) parseResult = (ItemCategories.Unknown, false);
 
             SaleResponse response = new SaleResponse();
             SaleItem item = new SaleItem();
@@ -43,6 +45,7 @@ namespace Sales_taxes
             if (!isValid(input))
             {
                 response.Error = "Invalid input";
+                return response;
             }
 
             var stringParts = input.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
@@ -78,19 +81,26 @@ namespace Sales_taxes
             if (stringParts.Length >= 5)
             {
                 category = stringParts[stringParts.Length - 3];
-                item.Category = GetItemCategory(category);
+                parseResult = GetItemCategory(category);
 
-                if (item.Category != ItemCategories.Unknown)
+                if (parseResult.Item2)
                 {
                     item.Description = string.Join(' ', stringParts.Skip(1).Take(stringParts.Length - 4));
+                }
+                else
+                {
+                    item.Description = string.Join(' ', stringParts.Skip(1).Take(stringParts.Length - 3));
                 }
             }
             else//where only one word is written
             {
                 category = stringParts[1];
-                item.Category = GetItemCategory(category);
+                parseResult = GetItemCategory(category);
                 item.Description = category;
-            }            
+            }
+            
+            item.Category = parseResult.Item1;
+
 
             if (item.Description.ToLower().Contains("imported"))
             {
@@ -109,9 +119,10 @@ namespace Sales_taxes
             return response;
         }
 
-        private ItemCategories GetItemCategory(string input)
+        private (ItemCategories,bool) GetItemCategory(string input)
         {
-            ItemCategories output = ItemCategories.Unknown;
+            ItemCategories parsedCategory = ItemCategories.Unknown;
+            bool isParsed = false;
 
             var enumString = Enum.GetNames(typeof(ItemCategories)).ToList();            
             input = input.ToLower();
@@ -120,10 +131,10 @@ namespace Sales_taxes
 
             if (firstMatch != default)
             {
-                Enum.TryParse<ItemCategories>(firstMatch, out output);
+                isParsed = Enum.TryParse<ItemCategories>(firstMatch, out parsedCategory);
             }
             
-            return output;            
+            return (parsedCategory, isParsed);            
         }
 
         private bool isValid(string input)
@@ -153,12 +164,12 @@ namespace Sales_taxes
             
             if (!item.hasExceptions)
             {
-                basic = Math.Round((item.Price * basicTax / 100) * 5, 2) / 5;
+                basic = Math.Round(Math.Ceiling((item.Price * basicTax / 100) * 50) / 50, 1);
             }
 
             if (item.IsImported)
             {
-                import = Math.Round((item.Price * importTax / 100)* 5, 2) / 5;
+                import = Math.Round(Math.Ceiling((item.Price * importTax / 100) * 50) / 50, 1);
             }
 
             item.Taxes = (basic + import);
